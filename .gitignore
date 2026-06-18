@@ -1,0 +1,13 @@
+
+# Backend
+backend/node_modules
+backend/.env
+backend/uploads
+
+# Frontend
+frontend-v5/node_modules
+frontend-v5/dist
+
+# General
+*.log
+.DS_Store
