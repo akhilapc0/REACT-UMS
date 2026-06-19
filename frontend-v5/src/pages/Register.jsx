@@ -14,12 +14,17 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    
+    if (!name.trim()) return setError('Name is required');
+    if (!email.trim()) return setError('Email is required');
+    if (password.length < 6) return setError('Password must be at least 6 characters');
+
     setLoading(true);
     try {
       await axios.post('http://localhost:5000/api/auth/register', {
-        name,
-        email,
-        password
+        name, email, password
       });
       setSuccess('Registration successful! Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
@@ -29,7 +34,6 @@ function Register() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
