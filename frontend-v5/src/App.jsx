@@ -7,6 +7,8 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
+import AdminDashboard from './pages/admin/AdminDashboard';
+
 
 function App() {
     return (
@@ -31,9 +33,10 @@ function App() {
 
                 <Route path="/admin/dashboard" element={
                     <AdminProtectedRoute>
-                        <h1>Dashboard coming soon</h1>
+                        <AdminDashboard />
                     </AdminProtectedRoute>
                 } />
+
 
             </Routes>
         </BrowserRouter>
