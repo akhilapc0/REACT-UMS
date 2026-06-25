@@ -6,21 +6,43 @@ function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState('');
+  const [apiError, setApiError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
+  const validate = () => {
+    const newErrors = {};
+    if (!name.trim()) {
+      newErrors.name = 'Name is required';
+    } else if (name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = 'Enter a valid email address';
+    }
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    return newErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    
-    if (!name.trim()) return setError('Name is required');
-    if (!email.trim()) return setError('Email is required');
-    if (password.length < 6) return setError('Password must be at least 6 characters');
-
+    setApiError('');
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setErrors({});
     setLoading(true);
     try {
       await axios.post('http://localhost:5000/api/auth/register', {
@@ -29,11 +51,12 @@ function Register() {
       setSuccess('Registration successful! Redirecting to login...');
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setApiError(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
@@ -45,9 +68,9 @@ function Register() {
           <p className="text-gray-500 mt-1">Join us today</p>
         </div>
 
-        {error && (
+        {apiError && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
-            {error}
+            {apiError}
           </div>
         )}
         {success && (
@@ -63,33 +86,45 @@ function Register() {
               type="text"
               placeholder="John Doe"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-              required
+              onChange={(e) => { setName(e.target.value); setErrors({...errors, name: ''}); }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition ${errors.name ? 'border-red-400' : 'border-gray-300'}`}
             />
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
               placeholder="you@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-              required
+              onChange={(e) => { setEmail(e.target.value); setErrors({...errors, email: ''}); }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition ${errors.email ? 'border-red-400' : 'border-gray-300'}`}
             />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setErrors({...errors, password: ''}); }}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition pr-12 ${errors.password ? 'border-red-400' : 'border-gray-300'}`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
           </div>
+
           <button
             type="submit"
             disabled={loading}
